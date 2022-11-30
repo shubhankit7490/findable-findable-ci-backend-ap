@@ -1,0 +1,28 @@
+# Created by .ignore support plugin (hsz.mobi)
+application/views/compiled/
+.idea/
+.DS_Store
+application/.DS_Store
+
+# Angular files
+.idea
+node_modules
+jspm_packages
+npm-debug.*
+link-checker-results.txt
+app/**/*.js
+*.js.map
+e2e/**/*.js
+e2e/**/*.js.map
+_test-output
+_temp
+/dist/
+application/cache/
+static/
+static/pdf/
+composer.lock
+
+assets/pdf/*.pdf
+assets/files/*.pdf
+assets/files/*.doc
+assets/files/*.docx
