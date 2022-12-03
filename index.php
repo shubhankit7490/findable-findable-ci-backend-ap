@@ -24,6 +24,8 @@ if ( isset( $_SERVER['SERVER_SOFTWARE'] ) AND $server_software = trim( $_SERVER[
 			define( 'ENVIRONMENT', 'staging' );
 		} else if ( $_SERVER['SERVER_NAME'] == 'findable-api.appspot.com' ) {
 			define( 'ENVIRONMENT', 'production' );
+		}else if ( $_SERVER['SERVER_NAME'] == '104.154.44.66' ) {
+			define( 'ENVIRONMENT', 'staging' );
 		} else {
 			define( 'ENVIRONMENT', 'development' );
 		}

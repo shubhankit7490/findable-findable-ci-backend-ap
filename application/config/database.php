@@ -99,9 +99,9 @@ $db['development'] = array(
 
 $db['staging'] = array(
 	'dsn'	=> '',
-	'hostname' => '/cloudsql/findable-api:us-central1:findable-api-sql',
-	'username' => 'findable',
-	'password' => '1findable2user',
+	'hostname' => 'localhost',
+	'username' => 'root',
+	'password' => 'Secure@123',
 	'database' => 'findable_staging',
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',
