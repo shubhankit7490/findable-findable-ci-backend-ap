@@ -34,6 +34,18 @@ class Base_Form_validation extends CI_Form_validation {
 			'rules'  => 'trim|max_length[16]',
 			'errors' => array()
 		),
+		'mobile_numbar'                  => array(
+			'field'  => 'mobile_numbar',
+			'label'  => 'mobile number',
+			'rules'  => 'trim|required|max_length[16]',
+			'errors' => array()
+		),
+		'job_title'                  => array(
+			'field'  => 'job_title',
+			'label'  => 'job title',
+			'rules'  => 'trim|required',
+			'errors' => array()
+		),
 		'skype'                  => array(
 			'field'  => 'skype',
 			'label'  => 'lang:skype',
@@ -73,7 +85,7 @@ class Base_Form_validation extends CI_Form_validation {
 		'location[city_name]'      => array(
 			'field'  => 'location[city_name]',
 			'label'  => 'lang:location',
-			'rules'  => 'trim|required|min_length[1]|max_length[150]',
+			'rules'  => 'trim|required|min_length[1]|max_length[500]',
 			'errors' => array()
 		),
 		'salary'                 => array(
@@ -128,6 +140,12 @@ class Base_Form_validation extends CI_Form_validation {
 			'field'  => 'company[id]',
 			'label'  => 'lang:company',
 			'rules'  => 'trim|required|integer|min_length[1]|max_length[11]|company_id_integer',
+			'errors' => array()
+		),
+		'company'            => array(
+			'field'  => 'company',
+			'label'  => 'lang:company',
+			'rules'  => 'trim|required|min_length[1]|max_length[256]',
 			'errors' => array()
 		),
 		'industry[id]'           => array(
@@ -547,6 +565,12 @@ class Base_Form_validation extends CI_Form_validation {
 		'package_name' => array(
 			'field'  => 'name',
 			'label'  => 'lang:package_name',
+			'rules'  => 'trim|required|min_length[1]|max_length[150]',
+			'errors' => array()
+		),
+		'name' => array(
+			'field'  => 'name',
+			'label'  => 'name',
 			'rules'  => 'trim|required|min_length[1]|max_length[150]',
 			'errors' => array()
 		),

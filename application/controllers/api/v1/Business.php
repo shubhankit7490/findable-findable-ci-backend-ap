@@ -2573,5 +2573,139 @@ class Business extends Base_Controller {
 		}
 		return $client;
 	}
+	/**
+	 * partner_get
+	 *
+	 * Get the history of the purchases
+	 *
+	 * @access    public
+	 *
+	 * @role    manager, admin
+	 *
+	 * @param integer $business_id
+	 *
+	 * @return    void
+	 */
+	public function partner_get( $business_id ) {
+		$valid               = true;
+		$form_validated      = true;
+		$manager_business_id = false;
+
+		$from = $this->get( 'from' );
+		$to   = $this->get( 'to' );
+
+		// Validate the input parameters
+		$form_validated = $this->validateRequestParameters( $this->get(), array(
+			'searches_from',
+			'searches_to'
+		) );
+
+		if ( ! $valid ) {
+			$this->response( [
+				'status'  => false,
+				'message' => 'Bad request'
+			], Base_Controller::HTTP_BAD_REQUEST );
+		} else if ( ! $form_validated->result ) {
+			$this->response( [
+				'status'  => false,
+				'message' => $form_validated->errors
+			], Base_Controller::HTTP_NOT_ACCEPTABLE );
+		} else {
+			$this->load->model( 'Model_business_partner' );
+			$this->Model_business_partner->created_by = $business_id;
+
+			$searches = $this->Model_business_partner->get_partner_searches( $from, $to );
+
+			$this->response( $searches, Base_Controller::HTTP_OK );
+		}
+	}
+	/**
+	 * partner_get
+	 *
+	 * Add partner for business account
+	 *
+	 * @access    public
+	 *
+	 * @role    manager, admin
+	 *
+	 * @param integer $business_id
+	 *
+	 * @return    void
+	 */
+	public function partner_post( $business_id ) {
+		$valid          = true;
+		$form_validated = true;
+		// Get the current user from the cache / from the database
+		$this->load->model( 'Model_business_partner' );
+		$partner = $this->request->body;
+		$partner = ( is_string( $partner ) ) ? json_decode( $partner, true ) : $partner;
+		$validate_array=array(
+				'name',
+				'mobile_numbar',
+				'email',
+				'company',
+				'location[city_name]',
+				'job_title'
+			);
+		if ( is_null( $partner ) || empty( $partner )) {
+			$valid = false;
+		} else {
+			// Validating input parameters
+			$form_validated = $this->validateRequestParameters( $partner, $validate_array );
+		}
+		$is_platform_email        = $this->Model_business_partner->get_by_email_login($this->post( 'email' ));
+		if ( ! $valid ) {
+			$this->response( [
+				'status'  => false,
+				'message' => 'Bad request'
+			], Base_Controller::HTTP_BAD_REQUEST );
+		} else if ( ! $form_validated->result ) {
+			$this->response( [
+				'status'  => false,
+				'message' => $form_validated->errors
+			], Base_Controller::HTTP_NOT_ACCEPTABLE );
+		}else if ( $is_platform_email ) {
+			$this->response( [
+					'status'  => false,
+					'message' => 'User exists, please login'
+				], Base_Controller::HTTP_BAD_REQUEST );
+		} else {
+
+			$this->load->model('model_location');
+			$city_id = $this->model_location->get_city_id($partner['location'], false);
+			// Load the business model
+			$this->Model_business_partner->name             = (isset($partner['name']))?$partner['name']:'';
+			$this->Model_business_partner->created_by = $business_id;
+			$this->Model_business_partner->mobile_numbar             = $this->has_param( $partner, 'mobile_numbar' );
+			$this->Model_business_partner->city_id                   = $city_id;
+			$this->Model_business_partner->email               = $this->has_param( $partner, 'email' );;
+			$this->Model_business_partner->company          = $this->has_param( $partner, 'company' );
+			$this->Model_business_partner->job_title      = $this->has_param( $partner, 'job_title' );
+			$this->Model_business_partner->tags             = $this->has_param( $business, 'tags' );
+			$this->Model_business_partner->status                    = 'active'; // The business will become active after the first payment is made
+			// Start a database transaction
+			$this->db->trans_start();
+
+			// Create the business entity
+			$this->Model_business_partner->create();
+
+			$this->db->trans_complete();
+
+			if ( $this->db->trans_status() === false ) {
+				// Database transaction failed
+				$this->response( [
+					'status'  => false,
+					'message' => $this->get_transaction_error() ?: 'System error'
+				], Base_Controller::HTTP_BAD_REQUEST );
+			} else {
+				
+				$this->response( [
+					'status'  => true,
+					'message' => $this->Model_business_partner->id
+				], Base_Controller::HTTP_OK );
+			}
+		}
+	}
+
 
 }

@@ -60,7 +60,7 @@ class Base_Model extends CI_Model {
 	protected $tbl_user_status = 'user_status'; // Status and preferences of users
 	protected $tbl_subscription = 'subscriptions';  // Subscriptions of applicants
 	protected $tbl_candidate_upload = 'candidate_upload';  // Uploaded candidate by resume
-
+	protected $tbl_business_partner = 'business_partner';  // Uploaded candidate by resume
 	protected $allowed_dictionary_filters = array(
 		'deleted'
 	);

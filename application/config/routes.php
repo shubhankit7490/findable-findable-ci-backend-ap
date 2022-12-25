@@ -170,7 +170,7 @@ $route['business/(:num)/results/(:num)'] = 'api/v1/business/results/$1/$2';
 $route['business/(:num)/sendemail'] = 'api/v1/business/sendemail/$1';
 
 $route['business/oauth2callback'] = 'api/v1/business/oauth2callback';
-
+$route['business/(:num)/partner'] = 'api/v1/business/partner/$1';
 
 // Packages
 $route['package'] = 'api/v1/packages/index';

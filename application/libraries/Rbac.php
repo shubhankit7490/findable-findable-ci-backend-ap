@@ -138,6 +138,7 @@ class Rbac {
 			'applicants/index'            => array( 'create' ),
 			'business/purchases'          => array( 'create' ),
 			'business/updateapplicantstatus' => array( 'read', 'create', 'update', 'delete' ),
+			'business/partner'            => array( 'read', 'create', 'update', 'delete' ),
 			'business/applicants'         => array( 'create' ),
 			'business/application'        => array( 'create' ),
 			'business/statistics'         => array( 'read' ),
@@ -216,6 +217,7 @@ class Rbac {
 			'user/subscription' 					=> array( 'read'),
 			'business/sendemail'              => array( 'read', 'create', 'update' ),
 			'business/oauth2callback'              => array( 'read', 'create', 'update' ),
+			'business/partner'            => array( 'read', 'create', 'update', 'delete' ),
 		),
 		'admin'     => array(
 			'user/index'                  => array( 'read' ),
@@ -263,6 +265,7 @@ class Rbac {
 			'business/payments'           => array( 'read', 'update' ),
 			'business/purchases'          => array( 'read', 'create' ),
 			'business/updateapplicantstatus'  => array( 'read', 'create', 'update', 'delete' ),
+			'business/partner'            => array( 'read', 'create', 'update', 'delete' ),
 			'business/searches'           => array( 'read', 'update' ),
 			'business/results'            => array( 'read' ),
 			'business/statistics'         => array( 'read' ),
