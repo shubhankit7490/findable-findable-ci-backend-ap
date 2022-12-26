@@ -56,7 +56,7 @@ class Model_business_partner extends Base_Model {
 	 *
 	 * @return    array
 	 */
-	public function get_partner_searches( $from = null, $to = null ) {
+	public function get_partner_searches($offset, $from = null, $to = null,$seatch=[] ) {
 		$fields = $this->get_fields();
 		$this->load->model('model_location');
 		$location_fields = $this->model_location->get_model();
@@ -70,7 +70,15 @@ class Model_business_partner extends Base_Model {
 		$this->db->join( $this->tbl_continents, $this->tbl_continents . '.continent_id = ' . $this->tbl_countries . '.continent_id', 'left' );
 		$this->db->where( $this->tbl_business_partner . '.created_by', $this->created_by );
 		//$this->db->where( $this->tbl_business_partner . '.deleted', $this->deleted );
-
+		if ( isset( $seatch['city_id'] ) && ! is_null( $seatch['city_id'] ) ) {
+			$this->db->where( $this->tbl_business_partner . '.city_id', $seatch['city_id'] );
+		}
+		if ( isset( $seatch['company'] ) && ! is_null( $seatch['company'] ) ) {
+			$this->db->where_in( $this->tbl_business_partner . '.company', $seatch['company'] );
+		}
+		if ( isset( $seatch['job_title'] ) && ! is_null( $seatch['job_title'] ) ) {
+			$this->db->where_in( $this->tbl_business_partner . '.job_title', explode(',',$seatch['job_title'] ));
+		}
 		if ( ! is_null( $from ) ) {
 			$this->db->where( $this->tbl_business_partner . '.created >=', $from );
 		}
@@ -80,7 +88,7 @@ class Model_business_partner extends Base_Model {
 		}
 
 		$this->db->order_by($this->tbl_business_partner . '.created', 'DESC');
-
+		$this->db->limit( 50, $offset );
 		$query = $this->db->get();
 
 		if ( $query->num_rows() > 0 ) {
@@ -90,7 +98,29 @@ class Model_business_partner extends Base_Model {
 		return [];
 	}
 
+	public function get_filter(){
+		$filter=[];
+		$this->db->select('company');
+		$this->db->from( $this->tbl_business_partner );
+		$this->db->where( $this->tbl_business_partner . '.created_by', $this->created_by );
+		$this->db->group_by($this->tbl_business_partner.'.company');
+		$this->db->order_by($this->tbl_business_partner . '.company', 'ASC');
+		$query = $this->db->get();
 
+		if ( $query->num_rows() > 0 ) {
+			$filter['company']=$query->result();
+		}
+		$this->db->select('job_title');
+		$this->db->from( $this->tbl_business_partner );
+		$this->db->where( $this->tbl_business_partner . '.created_by', $this->created_by );
+		$this->db->group_by($this->tbl_business_partner.'.job_title');
+		$this->db->order_by($this->tbl_business_partner . '.job_title', 'ASC');
+		$query = $this->db->get();
+		if ( $query->num_rows() > 0 ) {
+			$filter['job_title']=$query->result();
+		}
+		return $filter;
+	}
 	/**
 	 * soft_delete
 	 *
@@ -109,6 +139,17 @@ class Model_business_partner extends Base_Model {
 
 		return $this->db->affected_rows() > 0;
 	}
+	public function update($id) {
+	
 
+		$this->db->where( 'id', $id );
+
+		unset( $this->created_by );
+
+		$this->db->set( $this );
+		$this->db->update( $this->tbl_business_partner );
+
+		return $this->db->affected_rows() > 0;
+	}
 
 }

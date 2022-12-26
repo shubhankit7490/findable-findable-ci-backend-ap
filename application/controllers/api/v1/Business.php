@@ -2590,7 +2590,8 @@ class Business extends Base_Controller {
 		$valid               = true;
 		$form_validated      = true;
 		$manager_business_id = false;
-
+		$offset  = $this->query( 'offset' );
+		$search  = $this->get();
 		$from = $this->get( 'from' );
 		$to   = $this->get( 'to' );
 
@@ -2614,11 +2615,12 @@ class Business extends Base_Controller {
 			$this->load->model( 'Model_business_partner' );
 			$this->Model_business_partner->created_by = $business_id;
 
-			$searches = $this->Model_business_partner->get_partner_searches( $from, $to );
-
-			$this->response( $searches, Base_Controller::HTTP_OK );
+			$data['result'] = $this->Model_business_partner->get_partner_searches($offset ?: 0, $from, $to ,$search);
+			$data['filter']=$this->Model_business_partner->get_filter();
+			$this->response( $data, Base_Controller::HTTP_OK );
 		}
 	}
+
 	/**
 	 * partner_get
 	 *
@@ -2702,6 +2704,43 @@ class Business extends Base_Controller {
 				$this->response( [
 					'status'  => true,
 					'message' => $this->Model_business_partner->id
+				], Base_Controller::HTTP_OK );
+			}
+		}
+	}
+	public function partner_put( $partner_id ) {
+		$valid          = true;
+		// Get the current user from the cache / from the database
+		$this->load->model( 'Model_business_partner' );
+		$partner = $this->request->body;
+		if ( is_null( $partner ) || empty( $partner )) {
+			$this->response( [
+				'status'  => false,
+				'message' => 'Bad request'
+			], Base_Controller::HTTP_BAD_REQUEST );
+		} else {
+			$this->Model_business_partner->tags             = (isset($partner['tags']))?$partner['tags']:'';
+			$this->Model_business_partner->industry             = (isset($partner['industry']))?$partner['industry']:0;
+			$this->Model_business_partner->comment               = $this->has_param( $partner, 'comment' );
+			$this->Model_business_partner->updated          = date('Y-m-d h:i:s');
+			$this->db->trans_start();
+
+			// Create the business entity
+			$this->Model_business_partner->update($partner_id);
+
+			$this->db->trans_complete();
+
+			if ( $this->db->trans_status() === false ) {
+				// Database transaction failed
+				$this->response( [
+					'status'  => false,
+					'message' => $this->get_transaction_error() ?: 'System error'
+				], Base_Controller::HTTP_BAD_REQUEST );
+			} else {
+				
+				$this->response( [
+					'status'  => true,
+					'message' => 'Partner updated successfully'
 				], Base_Controller::HTTP_OK );
 			}
 		}
