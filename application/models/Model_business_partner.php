@@ -94,7 +94,6 @@ class Model_business_partner extends Base_Model {
 		if ( $query->num_rows() > 0 ) {
 			return $query->result();
 		}
-
 		return [];
 	}
 
@@ -120,6 +119,29 @@ class Model_business_partner extends Base_Model {
 			$filter['job_title']=$query->result();
 		}
 		return $filter;
+	}
+	public function get_total($from = null, $to = null,$seatch=[]){
+		$this->db->select('count(*) as total');
+		$this->db->from( $this->tbl_business_partner );
+		$this->db->where( $this->tbl_business_partner . '.created_by', $this->created_by );
+		if ( isset( $seatch['city_id'] ) && ! is_null( $seatch['city_id'] ) ) {
+			$this->db->where( $this->tbl_business_partner . '.city_id', $seatch['city_id'] );
+		}
+		if ( isset( $seatch['company'] ) && ! is_null( $seatch['company'] ) ) {
+			$this->db->where_in( $this->tbl_business_partner . '.company', $seatch['company'] );
+		}
+		if ( isset( $seatch['job_title'] ) && ! is_null( $seatch['job_title'] ) ) {
+			$this->db->where_in( $this->tbl_business_partner . '.job_title', explode(',',$seatch['job_title'] ));
+		}
+		if ( ! is_null( $from ) ) {
+			$this->db->where( $this->tbl_business_partner . '.created >=', $from );
+		}
+
+		if ( ! is_null( $to ) ) {
+			$this->db->where( $this->tbl_business_partner . '.created <=', $to );
+		}
+		$query = $this->db->get();
+		return $query->row()->total;
 	}
 	/**
 	 * soft_delete

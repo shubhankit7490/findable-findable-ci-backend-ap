@@ -2617,6 +2617,7 @@ class Business extends Base_Controller {
 
 			$data['result'] = $this->Model_business_partner->get_partner_searches($offset ?: 0, $from, $to ,$search);
 			$data['filter']=$this->Model_business_partner->get_filter();
+			$data['total']=$this->Model_business_partner->get_total($from, $to ,$search);
 			$this->response( $data, Base_Controller::HTTP_OK );
 		}
 	}
@@ -2680,10 +2681,10 @@ class Business extends Base_Controller {
 			$this->Model_business_partner->created_by = $business_id;
 			$this->Model_business_partner->mobile_numbar             = $this->has_param( $partner, 'mobile_numbar' );
 			$this->Model_business_partner->city_id                   = $city_id;
-			$this->Model_business_partner->email               = $this->has_param( $partner, 'email' );;
+			$this->Model_business_partner->email               = $this->has_param( $partner, 'email' );
 			$this->Model_business_partner->company          = $this->has_param( $partner, 'company' );
 			$this->Model_business_partner->job_title      = $this->has_param( $partner, 'job_title' );
-			$this->Model_business_partner->tags             = $this->has_param( $business, 'tags' );
+			$this->Model_business_partner->tags             = $this->has_param( $partner, 'tags' );
 			$this->Model_business_partner->status                    = 'active'; // The business will become active after the first payment is made
 			// Start a database transaction
 			$this->db->trans_start();
@@ -2710,21 +2711,52 @@ class Business extends Base_Controller {
 	}
 	public function partner_put( $partner_id ) {
 		$valid          = true;
+		$form_validated = true;
 		// Get the current user from the cache / from the database
 		$this->load->model( 'Model_business_partner' );
 		$partner = $this->request->body;
+		$partner = ( is_string( $partner ) ) ? json_decode( $partner, true ) : $partner;
+		$validate_array=array(
+				'name',
+				'mobile_numbar',
+				'company',
+				'job_title'
+			);
 		if ( is_null( $partner ) || empty( $partner )) {
+			$valid = false;
+		} else {
+			// Validating input parameters
+			$form_validated = $this->validateRequestParameters( $partner, $validate_array );
+		}
+		if ( ! $valid ) {
 			$this->response( [
 				'status'  => false,
 				'message' => 'Bad request'
 			], Base_Controller::HTTP_BAD_REQUEST );
-		} else {
+		} else if ( ! $form_validated->result ) {
+			$this->response( [
+				'status'  => false,
+				'message' => $form_validated->errors
+			], Base_Controller::HTTP_NOT_ACCEPTABLE );
+		}else {
+			$this->load->model('model_location');
+			$city_id=0;
+			if(isset($partner['location'])){
+				$city_id = $this->model_location->get_city_id($partner['location'], false);
+			}
+			
 			$this->Model_business_partner->tags             = (isset($partner['tags']))?$partner['tags']:'';
 			$this->Model_business_partner->industry             = (isset($partner['industry']))?$partner['industry']:0;
 			$this->Model_business_partner->comment               = $this->has_param( $partner, 'comment' );
+			$this->Model_business_partner->name             = (isset($partner['name']))?$partner['name']:'';
+			$this->Model_business_partner->mobile_numbar             = $this->has_param( $partner, 'mobile_numbar' );
+			if($city_id>0){
+				$this->Model_business_partner->city_id                   = $city_id;
+			}
+			$this->Model_business_partner->company          = $this->has_param( $partner, 'company' );
+			$this->Model_business_partner->job_title      = $this->has_param( $partner, 'job_title' );
 			$this->Model_business_partner->updated          = date('Y-m-d h:i:s');
 			$this->db->trans_start();
-
 			// Create the business entity
 			$this->Model_business_partner->update($partner_id);
 
